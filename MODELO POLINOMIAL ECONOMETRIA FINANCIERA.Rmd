@@ -1,0 +1,191 @@
+---
+title: "MODELO REGRESION POLINOMIAL"
+author: "Laura Rodriguez & Valeria Soto"
+date: "10/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Importar los datos
+
+```{r imp}
+library("readxl")
+bcomercial = read_excel("F:/BC.xlsx")
+```
+
+##Caracteristicas de series de tiempo
+
+bc = bcomercial$balanza
+fecha = as.Date(bcomercial$fecha, format = "%Y-%m-%d")
+Un grafico simple
+
+plot(bc~fecha, type = "l")
+
+```{r var}
+bc = bcomercial$balanza
+fecha = as.Date(bcomercial$fecha, format = "%Y-%m-%d")
+plot(bc~fecha, type = "l")
+```
+
+CARACTERISTICAS DE LA SERIE DE TIEMPO 
+- Periodicidad: mensual 
+- Fechas: enero 2007 a mayo 2019 
+- La balanza comercial esta dada en millones de dolares FOB.
+
+##Modelo de regresion polinomial
+
+T = length(bc) # numero de observaciones solo sirve cuando son values
+t = seq(1,T)
+t2 = t^2
+t3 = t^3
+t4 = t^4
+t5 = t^5
+
+
+```{r obs}
+T = length(bc) # numero de observaciones solo sirve cuando son values
+t = seq(1,T)
+t2 = t^2
+t3 = t^3
+t4 = t^4
+t5 = t^5
+```
+
+Crear las dummies para recoger el efecto estacional:
+
+```{r dum}
+done = as.numeric((fecha>="2007-11-01")&(fecha<="2008-08-01"))
+dtwo = as.numeric((fecha>="2011-12-01")&(fecha<="2014-09-01"))
+dthree = as.numeric((fecha>="2016-05-01")&(fecha<="2018-04-01"))
+```
+
+
+Agrupar las variables que hacen parte del modelo y estimar el modelo econometrico:
+
+```{r modelo}
+V = data.frame(bc,t,t2,t3,t4,t5,done,
+               dtwo,dthree,row.names = fecha)
+R_py = lm(bc~.-1,data = V)
+summary(R_py)
+```
+
+
+Explicacion significancia: Todas las variables son significativas al 1%
+
+Explicacion dummies: 
+
+* Done= de noviembre de 2007 a agosto del 2008, la balanza comercial aumento en 58.5 millones de dolares FOB.
+
+* Dtwo= de diciembre de 2011 a septiembre del 2014, la balanza comercial aumento en 64.2 millones de dolares FOB.
+
+* Dthree= de mayo de 2016 a abril de 2018, la balanza comercial aumento en 44.6 millones de dolares FOB.
+
+
+##Pronosticos
+
+Proyectar el modelo de la balanza comercial. Donde el periodo dentro de la muestra va de enero de 2007 hasta diciembre de 2018.
+
+```{r pronos}
+R_py2 = lm(bc~.-1,data = subset(V,fecha<"2019-01-01"))
+summary(R_py2)
+```
+
+A continuacion se proyecta los primeros cinco meses de 2019:
+
+
+```{r pronosticos}
+bcf = predict(R_py2, newdata = subset(V,fecha>="2019-01-01"),interval = "prediction")
+bcf = as.data.frame(bcf)
+bcf
+```
+
+EXPLICACION PRONOSTICOS 
+* 1: Con un nivel de confianza del 95% aproximadamente, se proyecta que la balanza comercial para enero de 2019 estara entre -1437.014 y 62.18980 millones de dolares FOB. La proyeccion punto de la balanza comercial para enero del 2019 sera de -687.4123 millones de dolares FOB.
+
+* 2: Con un nivel de significancia del 95% aproximadmente, se proyecta que la balanza comercial para febrero de 2019 estara entre -1496.515 y 86.66511 millones de dolares FOB. La proyeccion punto de la balanza comercial para febrero del 2019 sera de -704.9248 millones de dolares FOB.
+
+* 3: Con un nivel de significancia del 95% aproximadamente, se proyecta que la balanza comercial para marzo de 2019 estara entre -1573.260 y 116.45846 millones de dolares FOB. La proyeccion punto de la balanza comercial para marzo del 2019 sera de -728.4009 millones de dolares FOB.
+
+* 4: Con un nivel de significancia del 95% aproximadamente, se proyecta que la balanza comercial para abril de 2019 estara entre -1668.307 y 151.68930 millones de dolares FOB. La proyeccion punto de la balanza comercial para abril del 2019 sera de -758.3089 millones de dolares FOB.
+
+* 5: Con un nivel de significancia del 95% aproximadamente, se proyecta que la balanza comercial para mayo de 2019 estara entre -1782.499 y 192.23116 millones de dolares FOB. La proyeccion punto de la balanza comercial para mayo del 2019 sera de -795.1338 millones de dolares FOB.
+
+
+##Medidas de error de pronostico
+
+Se instala la libreria Metrics
+Van los datos del 145 al 149 porque fueron los que se utilizaron para la proyeccion.
+
+```{r med_error}
+library(Metrics)
+rmse(bc[145:149],bcf$fit)
+mae(bc[145:149],bcf$fit)
+mape(bc[145:149],bcf$fit)*100 
+```
+
+
+EXPLICACIONES MEDIDAS DE ERROR:
+
+- RMSE: En promedio, se tiene un error pronostico de 208.0961 millones de dolares FOB.
+
+- MAE: En promedio, se tiene un error pronostico de 160.9744 millones de dolares FOB.
+
+- MAPE: En promedio nuestro error de pronostico es 24.817%
+
+
+
+## Suavizado Exponencial
+
+Suavizado simple
+
+```{r exp_sim}
+library(aTSA)
+balanza_es = expsmooth(bc[1:144],lead = 5)
+balanza_es$pred
+# Calcular el RMSE
+
+rmse(bc[145:149],balanza_es$pred)
+```
+
+
+Suavizado Holt-Winters aditivo:
+
+```{r hw_ad}
+balanza_ts = ts(bc[1:144], start = c(2007,1), frequency = 12)
+
+balanza_hwa = HoltWinters(balanza_ts, seasonal = "additive")
+balanza_hwap = predict(balanza_hwa,n.ahead = 5)
+balanza_hwap = as.data.frame(balanza_hwap)
+balanza_hwap
+
+# Calcular el RMSE
+
+rmse(bc[145:149],balanza_hwap$fit)
+```
+
+
+
+
+Suavizado Holt-Winters multiplicativo:
+
+
+
+```{r hw_mul}
+balanza_ts = ts(bc[1:144], start = c(2007,1), frequency = 12)
+
+balanza_hwm = HoltWinters(balanza_ts, seasonal = "mult")
+balanza_hwmp = predict(balanza_hwm,n.ahead = 5)
+balanza_hwmp = as.data.frame(balanza_hwmp)
+balanza_hwmp
+# Calcular el RMSE
+
+rmse(bc[145:149],balanza_hwmp$fit)
+```
+
+
+EXPLICACION SUAVIZADO: Se logra concluir que el mejor modelo para pronosticar es el suavizado exponencial simple porque es el que tiene el numero de errores mas bajo siendo de 198.45.
+
+
