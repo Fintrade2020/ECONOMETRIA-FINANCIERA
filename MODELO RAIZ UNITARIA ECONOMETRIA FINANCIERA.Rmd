@@ -1,0 +1,171 @@
+---
+title: "MODELO RAIZ UNITARIA BALANZA COMERCIAL"
+author: "Laura Rodriguez & Valeria Soto"
+date: "10/2/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Imporar datos
+
+Borrar el environment e importar los datos
+
+
+
+```{r imp}
+
+# borrar el environment
+rm(list=ls())
+
+#importar
+library(readxl)
+balanzac = read_excel("F:/BC.xlsx")
+```
+
+
+## Pasos previos Y
+
+"Sacar" la variable balanza y darle el formato de serie de tiempo
+
+```{r pv}
+
+balanza = balanzac$balanza
+balanza = ts(balanza, start = c(2007,1), end = c(2019,5), frequency = 12)
+
+plot(balanza, type = "l")
+```
+
+
+CARACTERISTICAS DE LA SERIE DE TIEMPO
+Periodicidad: mensual
+Fechas: enero 2007 a mayo 2019
+La balanza comercial esta dada en millones de dolares FOB
+
+
+
+## Prueba de raiz unitaria
+
+Se utiliza la prueba ADF
+
+Nivel:
+
+
+```{r adf_n}
+
+library(aTSA)
+# en niveles
+balanzaadf = adf.test(balanza, nlag = 3)
+```
+Con un nivel de significancia del 5% no se rechaza Ho ya que se encuentra que la serie no es estacionaria en niveles sin intercepto y sin tendencia.
+
+
+
+
+Primera diferencia:
+
+```{r adf_pd}
+
+# calcular la primera diferencia
+d_balanza = diff(balanza)
+
+d_balanzaadf = adf.test(d_balanza, nlag = 2)
+
+```
+
+Con un nivel de significancia del 5% se rechaza Ho, ya que se encuentra que la serie es estacionaria en primera diferencia sin intercepto y sin tendencia.
+
+
+
+## Correlograma de la transformada de Y
+
+Por la prueba ADF se obtuvo que se necesita primera diferencia. 
+
+
+```{r corr}
+
+par(mfrow=c(2,1))
+acf(d_balanza, main = "Correlograma de la primera diferencia de Balanza Comercial")
+pacf(d_balanza, main = '')
+
+```
+
+
+El modelo de la balanza comercial es un AR (1,2) y MA (9).
+La balanza comercial cada mes se ve afectada por choques externos como la variacion de los precios internacionales de commodities como por ejemplo el del petroleo, lo cual causa que se de una variacion significativa con respecto al valor de la balanza comercial mes a mes, al igual que la volatilidad de la TRM.
+
+
+
+
+
+
+## Estimacion
+
+Por el analisis de raiz unitaria se tiene que la balanza comercial es estacionaria en primer diferencia sin intercepto y sin tendencia
+
+
+```{r est}
+
+##M1 = estimate(balanza,p = c(1,2), d= 1, q = c(9), intercept = FALSE )
+M2 = estimate(d_balanza,p = c(1,2), q = c(9), intercept = FALSE)
+
+```
+
+p son los rezagos que dieron AR 
+q son los rezagos que dieron MA
+d significa primera diferencia
+
+
+
+M2: es cuando la variable dependiente es la primera diferencia
+
+COEFICIENTES: Se puede observar que todos los coeficientes son significativos con un nivel de significancia del 5%.
+
+Autocorrelacion:
+Para un nivel de significancia del 5%, no se rechaza la hipotesis nula de que la autocorrelacion es cero hasta el rezago 4,8,16,20,24 
+
+
+
+
+## Validacion de supuestos 
+
+La autocorrelacion ya se valido atras.
+
+Normalidad:
+
+```{r res}
+
+e_hat = M2$residuals
+
+# normalidad
+library(tseries)
+jarque.bera.test(e_hat)
+
+```
+
+Con un nivel de significancia del 5%, no rechazo la hipotesis nula de que los errores se distribuyen normalmente.
+
+
+
+Homoscedasticidad
+
+
+```{r hmc}
+
+library(FinTS)
+ArchTest(e_hat, lags = 1)
+
+```
+
+
+Con un nivel de significancia del 5%, no rechazo la hipotesis nula de que los errores sean homoscedasticos.
+
+
+
+
+
+
+
+
