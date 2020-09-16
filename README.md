@@ -7,11 +7,15 @@ Los temas referentes a pronosticos y medidas de error de pronosticos podran enco
 
 ### Excel "DTF Pronostico series de tiempo"
 En este excel podran encontrar pronosticos para la variable DTF como lo son promedios moviles, suavisación exponencial, indices estacionales y modelos polinomiales. Cada unos de estos con sus respectivas medidas de error MSE, MAE y MAPE. 
+
 ### R "DTF Pronosticos y medidas de error"
 En este R podran encontrar pronosticos para la variable DTF como lo son promedios moviles, suavisación exponencial, indices estacionales y modelos polinomiales. Cada unos de estos con sus respectivas medidas de error MSE, MAE y MAPE. 
+
 ### R "MODELO REGRESION POLINOMIAL"
 En este espacio encontrará ejemplos de modelos polinomiales utilizando las Dummy como metodo de pronostico. 
-### R 
-En este espacio encontrará ejemplos de modelos polinomiales utilizando las Dummy como metodo de pronostico. 
-, raíz unitaria en el software Rstudio, igualmente, encontrará un archivo en formato EXCEL llamado "BC", el cual es la base de datos utilizada para los ejemplos en cada uno de los temas a tratar dentro de esta carpeta.
+#### Base de datos EXCEL llamado "BC"
+
+### R "MODELO RAIZ UNITARIA BALANZA COMERCIAL"
+En este espacio encontrará ejemplos de raíz unitariada en el software Rstudio. 
+#### Base de datos EXCEL llamado "BC"
 
