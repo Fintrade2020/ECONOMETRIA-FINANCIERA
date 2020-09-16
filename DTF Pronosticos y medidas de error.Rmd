@@ -1,0 +1,239 @@
+---
+title: "Pronostico"
+output: html_document
+---
+
+```{r, excel, echo=FALSE, message=FALSE, warning=FALSE }
+
+library(readxl)
+
+datos_con_la_dtf <- read_excel("datos con la dtf.xlsx", 
+    col_types = c("date", "numeric", "numeric", 
+        "numeric", "numeric"))
+View(datos_con_la_dtf)
+
+attach(datos_con_la_dtf)
+
+serie1<-ts(`DTF`,frequency = 12, start=c(2001,01))
+fechas1=seq(as.Date("2001/1/1"), length.out = length(serie1), by="months")
+par(mfrow=c(2,2))
+ts.plot(`serie1`, main="Deposito a Termino Fijo")
+
+```
+
+
+```{r PROGRAMA, echo=FALSE, message=FALSE, warning=FALSE }
+#Instalar paquetes
+install.packages("smooth")
+install.packages("tseries")
+install.packages("forecast")
+library(smooth)
+library(tseries)
+library(forecast)
+
+```
+
+##### **Regresiones polinomicas**
+
+###### **Regresiones polinomicas del DTF**
+
+```{r regresion DTF, echo=FALSE, warning = FALSE, results = "hide", message=FALSE}
+#Modelos polinomicos
+T=length(serie1)
+t = seq(1:T) 
+t2 = t^2 
+t3 = t^3
+t4 = t^4
+t5 = t^5
+t6 = t^6
+t7 = t^7
+t8 = t^8
+t9 = t^9
+
+#Modelos polinomicos DTF
+mlineal1=lm(serie1~t)
+summary(mlineal1)
+f11<-predict.lm(mlineal1, h=3)
+
+mcuad1=lm(serie1~t+t2)
+summary(mcuad1)
+f12<-predict.lm(mcuad1, h=3)
+
+mcub1=lm(serie1~t+t2+t3)
+summary(mcub1)
+f13<-predict.lm(mcub1, h=3)
+
+mcuatro1=lm(serie1~t+t2+t3+t4)
+summary(mcuatro1)
+f14<-predict.lm(mcuatro1, h=3)
+
+mcinco1=lm(serie1~t+t2+t3+t4+t5)
+summary(mcinco1)
+f15<-predict.lm(mcinco1, h=3)
+
+mseis1<-lm(serie1~t+t2+t3+t4+t5+t6)
+summary(mseis1)
+f16<-predict.lm(mseis1,h=3)
+
+msiete1=lm(serie1~t+t2+t3+t4+t5+t6+t7)
+summary(msiete1)
+f17<-predict.lm(msiete1, h=7)
+
+mocho1=lm(serie1~t+t2+t3+t4+t5+t6+t7+t8)
+summary(mocho1)
+f18<-predict.lm(mocho1, h=3)
+
+mnueve1=lm(serie1~t+t2+t3+t4+t5+t6+t7+t8+t9)
+summary(mnueve1)
+f19<-predict.lm(mnueve1, h=3)
+
+```
+
+
+```{r graficos todas, echo=FALSE, warning = FALSE, results = "hide", message=FALSE}}
+#Graficos
+
+plot(fechas1,serie1,type="l",col="blue", main = "DTF")
+lines(fechas1,f11,col="green")
+lines(fechas1,f12,col="red")
+lines(fechas1,f13,col="pink")
+lines(fechas1,f14,col="purple")
+lines(fechas1,f15,col="darkorchid1")
+lines(fechas1,f16,col="hotpink")
+lines(fechas1,f17,col="coral3")
+lines(fechas1,f18,col="goldenrod3")
+lines(fechas1,f19,col="black")
+
+
+
+```
+
+##### **Medidas de error de pronóstico**
+
+###### **MSE**
+
+```{r erroresMSE ,echo=FALSE, message=FALSE, warning=FALSE}
+
+#Medidas de error de pron?stico
+#Medidas de error MSE DFT
+
+rmse11<-sqrt(MSE(serie1,f11))
+rmse12<-sqrt(MSE(serie1,f12))
+rmse13<-sqrt(MSE(serie1,f13))
+rmse14<-sqrt(MSE(serie1,f14))
+rmse15<-sqrt(MSE(serie1,f15))
+rmse16<-sqrt(MSE(serie1,f16))
+rmse17<-sqrt(MSE(serie1,f17))
+rmse18<-sqrt(MSE(serie1,f18))
+rmse19<-sqrt(MSE(serie1,f19))
+
+```
+
+###### **MAE**
+
+```{r erroreSmae ,echo=FALSE, message=FALSE, warning=FALSE}
+
+#Medidas de error de pron?stico
+
+#Medidas de error MAE DFT
+
+mae11<-MAE(serie1,f11)
+mae12<-MAE(serie1,f12)
+mae13<-MAE(serie1,f13)
+mae14<-MAE(serie1,f14)
+mae15<-MAE(serie1,f15)
+mae16<-MAE(serie1,f16)
+mae17<-MAE(serie1,f17)
+mae18<-MAE(serie1,f18)
+mae19<-MAE(serie1,f19)
+
+
+```
+
+
+```{r}
+forecast(f11)
+
+forecast(f12)
+forecast(f13)
+forecast(f14)
+forecast(f15)
+forecast(f16)
+forecast(f17)
+forecast(f18)
+forecast(f19)
+
+
+```
+
+```{r matriz, echo=FALSE, warning = FALSE, results = "hide", message=FALSE}}
+
+A1<-matrix(c(rmse11,mae11,mape11, rmse12,mae12,mape12,rmse13,mae13,mape13,rmse14,mae14,mape14,rmse15,mae15,mape15,rmse16,mae16,mape16,rmse17,mae17,mape17,rmse18,mae18,mape18,rmse19,mae19,mape19),3,byrow=FALSE)
+rownames(A1)<-c("RMSE","MAE", "MAPE")
+colnames(A1)<-c("Lineal","Cuadratico","Cubico","Grado4","Grado5","Grado6","Grado7","Grado8","Grado9")
+
+knitr :: kable (A1, caption = "DTF") 
+
+
+
+```
+
+
+```{r Indices savizamiento todas, echo=FALSE, warning = FALSE, results = "hide", message=FALSE}}
+library(forecast)
+#Indices suavizacion DTF
+m7<-ces(serie1,h=3,seasonality = "none")
+summary(m7)
+sDTF<-forecast(m7)
+plot(forecast(m7))
+
+
+#promedios moviles
+
+m1<-sma(serie1,h=3,silent="none")
+summary(m1)
+mDTF<-forecast(m1)
+plot(forecast(m1))
+
+
+#Medidas de error de pronostico 
+
+
+accuracy(mDTF)
+
+```
+
+
+```{r Indice estacional, echo=FALSE, warning = FALSE, results = "hide", message=FALSE}}
+
+#Indice Estacional DTF
+m4<-ces(serie1,h=3,seasonality = "s") #simple (S) 
+summary(m4)
+IDTF<-forecast(m4)
+plot(forecast(m4))
+
+
+#Medidas de error de pronostico
+
+MIDTF<-sqrt(MSE(serie1,IDTF))
+
+accuracy(IDTF))
+forecast(f1)
+
+```
+
+
+
+rmse1<-sqrt(MSE(des,f1))
+rmse2<-sqrt(MSE(des,f2))
+rmse7<-sqrt(MSE(des,f7))
+
+mae1<-MAE(des,f1)
+mae2<-MAE(des,f2)
+mae7<-MAE(des,f7)
+
+mape1<-MAPE(des,f1)
+mape2<-MAPE(des,f2)
+mape7<-MAPE(des,f7)
+
+
