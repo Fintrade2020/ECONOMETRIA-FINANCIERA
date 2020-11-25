@@ -1,6 +1,5 @@
 ---
 title: "Modelo Polinomial Exportaciones de Peru 2010-2020"
-author: "Jenny Llanos 63162007-  Jennifer Ortiz 63132129"
 date: "27 de agosto de 2020"
 output: html_document
 ---
@@ -170,7 +169,7 @@ En el segunda regresion se evidencia que las variables son significativivas.
 ```{r rsupuestos2}
 e_hat2 = R_pol2$residuals
 plot(e_hat2, type = "l")
-#No Autocorrelación (Breusch-Godfrey Test)
+#No AutocorrelaciÃ³n (Breusch-Godfrey Test)
 library(lmtest)
 bgtest(R_pol2, order = 6)
 # Normalidad
