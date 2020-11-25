@@ -1,0 +1,220 @@
+---
+title: "Modelo Polinomial Exportaciones de Peru 2010-2020"
+author: "Jenny Llanos 63162007-  Jennifer Ortiz 63132129"
+date: "27 de agosto de 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Borrar Enviroment
+
+```{r be}
+rm(list = ls())
+```
+
+# 1. Base de datos - Exportaciones de Peru 2010-2020
+
+La variable a utilizar es las exportaciones totales de Peru, calculada y dirigida por el Banco Central de Reserva del Peru (Gerencia Central de Estudios Economicos)
+
+
+La variable esta en valores FOB (millones US$) para el periodo 2010 al 2020, se representa con 126 observaciones de dos variables, con una frecuencia mensual.
+
+##1.1 Importar base de datos
+
+```{r importar}
+library(readxl)
+expoperu = read_excel("D:/Econometria financiera/expo.xlsx")
+```
+
+## 1.2. Definicion de variables
+
+```{r def}
+expo = expoperu$`Exportaciones`
+expo = ts(expo, start = c(2010,2), end = c(2020,7), frequency = 12)
+fecha = as.Date(expoperu$Fecha, format = "%Y-%m-%d")
+```
+
+# 1.3. Analisis grafico
+
+```{r g2}
+plot(expoperu, type = "l", ylab = "Millones de dolares", xlab = "")
+title(main = "Exportaciones de Peru\n 2010-2020")
+grid()
+```
+
+Para la serie de tiempo de las exportacions de Peru observamos  inicalmente una tendencia a la alza del perido 2010 al 2012 y del periodo 2016 al 2019, se observa para el 2020  una tendencia a la baja debido a la pandemia COVID-19, por ultimo se evidencia una aleatoriedad que posee la serie.
+
+# 2. Estimacion del Modelo Polinomial
+
+## 2.1. Creacion de Variables 
+
+Por un analisis previo se concluyo que el polinomio de grado 4 puede ser una adecuada aproximacion 
+
+```{r dx}
+#Creacion de la variable "t"
+
+T = length(expo)
+t = seq(1,T)
+t2 = t^2
+t3 = t^3
+t4 = t^4
+
+#Creacion de la dummies
+#Estacionalidad, es de un periodo dado
+
+done = as.numeric((fecha>="2012-01-01")&(fecha<="2014-12-01"))
+
+
+#dummidepandemia2020
+d20 = as.numeric((fecha>="2020-04-01")&(fecha<="2020-06-01"))
+
+```
+
+En la Dummis se ha creado dos, la primera es *done* ya que los flujos comerciales de Peru se recuperaron de los efectos de la crisis internacional de fines de 2008 y principios de
+2009, aunque a partir de 2012 comenzaron a desacelerarse ademas para el 2014 se presenta dismunicion en las exportaciones principalmente a ventas externas de EEUU (-13,9%), la Union Europea (-15%) y Japon (-20,6%)
+
+Para la segunda dummi *d20* las exportaciones peruanas acumularon un retroceso de -32,1% por el confinamiento mundial para evitar la propagacion del COVID-19
+
+##2.2. Regresion
+
+```{r reg}
+dr = data.frame(expo,t,t2,t3,t4,done,d20,row.names = fecha)
+R_pol = lm(expo~., data = dr)
+summary(R_pol)
+```
+
+El p-value de las dos dummis, se evidencia numeros minimos (0.007659 y 0.000341) todos menores al 1% que es el nivel de significancia con un nivel de confianza del 99% lo cual tiende a rechazar la Hipotesis Nula, es decir, hay una relacion dependiente ya que las variables son significativas 
+
+**done** : Se evidencia que las exportaciones totales es de 295.7 millones de dolares mas de lo normal 
+
+
+**d20** : Las exportaciones totales disminuyeron 9.682 millones de dolares menos de los normal 
+
+## 2.3. Supuestos 
+```{r supuestos}
+
+e_hat = R_pol$residuals #errores estimados del modelo
+plot(e_hat, type = "l")
+grid()
+
+#No Autocorrelacion codigo->(Breush-Godfrey Test)
+library(lmtest)
+bgtest(R_pol, order = 6)
+
+#Normalidad
+library(tseries)
+jarque.bera.test(e_hat) #los errores siguen una distribucion normal, no se rechaza la hipotesis que se distribuyen normal 
+#No hay correlacion y los errores se distribuyen normal. 
+
+#Homocedasticidad (Breusch-Pagan Test)
+bptest(R_pol)
+```
+
+Supuesto de No Autocorrelacion: Se evidencia un p-value 0.01257, con un nivel de significancia del 1%, lo cual no se rechaza la Hipotesis Nula, Ho.
+
+Supuesto de Normalidad: Se evidencia un p-value 0.6203 con un nivel de significancia del 1% no se rechaza la Hipotesis Nula, Ho.
+
+Supuesto de Homocedasticidad: Se evidencia un p-value del 0.05802, es decir, los errrores son homocedasticos con un nivel de confianza del 1%, no se rechaza la Hipotesis Nula, Ho. 
+
+## 2.4. Analisis Grafico 
+
+```{r g3}
+
+tmp = cbind(expo,R_pol$fitted.values)                        # variable que agrupa Observado y Estimado
+
+matplot(tmp,type="l",
+
+        lwd = c(2,2),
+
+        col = c("black","red"),
+
+        ylab='Milones de dolares', xlab='')
+
+title(main = "Exportaciones de Peru \n 2010-2020")     # \n genera una segunda linea en el titulo
+
+legend(x = "topleft", legend = c("Obs.","Est."),
+
+       lty = c(1,2), lwd = c(2,2), col = c("black","red")) # agrega leyenda al grafico
+
+grid()                                                     # agrega lineas secundarias
+
+```
+
+#3. Pronosticos
+
+## 3.1. Division de la muestra
+
+A continuacion, se busca realizar un pronostico con submuestra de prueba. Es decir, se re-estima el modelo hasta abril del 2020-04 y se proyecto a partir de mayo 2020-05
+
+```{r frames}
+# Definir el subconjunto de observaciones para realizar la re-estimacion
+s_bd = subset.data.frame(dr, fecha<="2020-04-01")
+# Definir el subconjunto de observaciones para comparar el pronostico
+o_bd = subset.data.frame(dr, fecha>="2020-05-01")
+```
+
+## 3.2. Re-estimacion del modelo y Comprobacion de Supuestos
+
+
+```{r reg2}
+R_pol2 = lm(expo~., data = s_bd)
+summary(R_pol2)
+```
+
+En el segunda regresion se evidencia que las variables son significativivas.
+
+```{r rsupuestos2}
+e_hat2 = R_pol2$residuals
+plot(e_hat2, type = "l")
+#No Autocorrelación (Breusch-Godfrey Test)
+library(lmtest)
+bgtest(R_pol2, order = 6)
+# Normalidad
+library(tseries)
+jarque.bera.test(e_hat2)
+# Homocedasticidad (Breusch-Pagan Test)
+bptest(R_pol2)
+```
+
+Supuesto de No Autocorrelacion: Se evidencia un p-value 0.01446, con un nivel de significancia del 1%, lo cual no se rechaza la Hipotesis Nula, Ho.
+
+Supuesto de Normalidad: Se evidencia un p-value 0.7059 con un nivel de significancia del 1% no se rechaza la Hipotesis Nula, Ho.
+
+Supuesto de Homocedasticidad: Se evidencia un p-value del 0.2471, es decir, los errores son homocedasticos con un nivel de confianza del 1%, no se rechaza la Hipotesis Nula, Ho. 
+
+## 3.3.Pronostico
+
+```{r pred}
+# Prediccion
+pred = predict(R_pol2, newdata = o_bd, interval = "prediction")
+pred
+```
+
+FIT: Prediccion punto
+
+* El pronostico de las exportaciones totales de Peru para el mes de Mayo es de 1692 Millones de Dolares 
+* El pronostico de las exportaciones totales de Peru para el mes de Junio es de 1542 Millones de Dolares
+
+LWR-UPR: Prediccion por intervalo
+
+* El pronostico de las exportaciones totales de Peru para el mes de Mayo esta entre 781 y 2602 millones de dolares 
+* El pronostico de las exportaciones totales de Peru para el mes de Junio esta entre 630 y 2455 millones de dolares 
+
+## 3.4. Medidas de error de pronostico
+
+```{r errped}
+library(Metrics)
+rmse(o_bd$expo,pred[,1])
+mae(o_bd$expo,pred[,1])
+mape(o_bd$expo,pred[,1])*100
+```
+
+*RMSE = En promedio el error de pronostico es de 941 Millones de Dolares 
+
+* MAE = En promedio el error de pronostico es de 799 Millones de Dolares 
+
+* MAPE = En promedio el error de pronostico es de un 30.4%
