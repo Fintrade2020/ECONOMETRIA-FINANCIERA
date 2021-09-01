@@ -40,7 +40,7 @@ Fecha  = as.Date(expoperu$Fecha, format="%Y-%m")
 ## 1.3. Analisis grafico
 
 ```{r g1, message=FALSE, echo=FALSE}
-# Gr·fico con ggplot2 + LaTEX
+# Gr√°fico con ggplot2 + LaTEX
 library(ggplot2)  
 library(latex2exp)
 a1 = data.frame(xperu, Fecha)
@@ -86,7 +86,7 @@ La serie exportaciones de Peru es estacionaria en primera diferencia, sin interc
 ## 3.1. Analisis grafico
 
 ```{r g2, message=FALSE, echo=FALSE}
-# Gr·fico con ggplot2 + LaTEX
+# Gr√°fico con ggplot2 + LaTEX
 library(ggplot2)  
 library(latex2exp)
 Fecha2 = Fecha[2:126]
