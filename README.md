@@ -3,7 +3,8 @@
 Como parte escencial la Econometría Financiera desarrolla modelos que expliquen de una mejor manera el comportamiento de una variable a lo largo del tiempo, de esta forma se puede pronosticar el comportamiento de esta y así tomar las mejores desiciones entorno al tratamiento de esta variable. 
 
 ## Temas
-Los temas referentes a pronosticos y medidas de error de pronosticos podran encontrarse en formato Excel y como dumento de R. 
+
+Cada carpeta contiene sus respetivas rutinas o códigos en R junto con su base de datos en formato Excel.
 
 | Carpeta | Tema |
 | --- | --- |
