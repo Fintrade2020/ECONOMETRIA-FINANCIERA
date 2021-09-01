@@ -5,18 +5,18 @@ Como parte escencial la Econometría Financiera desarrolla modelos que expliquen
 ## Temas
 Los temas referentes a pronosticos y medidas de error de pronosticos podran encontrarse en formato Excel y como dumento de R. 
 
-### Excel "DTF Pronostico series de tiempo"
-* En este excel podran encontrar pronosticos para la variable DTF como lo son promedios moviles, suavisación exponencial, indices estacionales y modelos polinomiales. Cada unos de estos con sus respectivas medidas de error MSE, MAE y MAPE. 
 
-### R "DTF Pronosticos y medidas de error"
-- En este R podran encontrar pronosticos para la variable DTF como lo son promedios moviles, suavisación exponencial, indices estacionales y modelos polinomiales. Cada unos de estos con sus respectivas medidas de error MSE, MAE y MAPE. 
+
+### Carpeta DTF
+
+- **R "DTF Pronosticos y medidas de error".** En este R podran encontrar pronosticos para la variable DTF como lo son promedios moviles, suavización exponencial, indices estacionales y modelos polinomiales. Cada unos de estos con sus respectivas medidas de error MSE, MAE y MAPE. 
 - **Base de datos EXCEL llamado "datos con la dtf"**
 
-### R "MODELO REGRESION POLINOMIAL"
-- En este espacio encontrará ejemplos de modelos polinomiales utilizando las Dummy como metodo de pronostico. 
+### Carpeta POLINOMIAL
+- **R "MODELO REGRESION POLINOMIAL"** En este espacio encontrará ejemplos de modelos polinomiales utilizando las Dummy como metodo de pronostico. 
 - **Base de datos EXCEL llamado "BC"**
 
-### R "MODELO RAIZ UNITARIA BALANZA COMERCIAL"
-- En este espacio encontrará ejemplos de raíz unitariada en el software Rstudio. 
+### Carpeta Raiz Unitaria
+- **R "MODELO RAIZ UNITARIA BALANZA COMERCIAL"** En este espacio encontrará ejemplos de raíz unitariada en el software Rstudio. 
 - **Base de datos EXCEL llamado "BC"**
 
