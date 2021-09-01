@@ -5,6 +5,11 @@ Como parte escencial la Econometría Financiera desarrolla modelos que expliquen
 ## Temas
 Los temas referentes a pronosticos y medidas de error de pronosticos podran encontrarse en formato Excel y como dumento de R. 
 
+| Carpeta | Tema |
+| --- | --- |
+| DTF| Pronosticos y medidas de error en R.|
+| Polinomial| Modelos econometricos polinomiales con variables dummy en R. |
+| Raiz Unitaria| Ejemplos de Raiz unitaria en R. |
 
 
 ### Carpeta DTF
